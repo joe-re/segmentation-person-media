@@ -3,6 +3,7 @@ import { segmentPerson } from './src/index'
 const startVideoButton = document.getElementById('start_video_button') as HTMLButtonElement
 const localVideo = document.getElementById('local_video') as HTMLVideoElement
 const maskedVideo = document.getElementById('masked_video') as HTMLVideoElement
+const canvas = document.getElementById('canvas') as HTMLCanvasElement
 export async function startVideo() {
   const mediaConstraints = { video: { width: 640, height: 480 }, audio: false };
 
@@ -16,7 +17,10 @@ export async function startVideo() {
   localVideo.volume = 0;
 
   startMaskedVideo();
-  segmentPerson(localVideo)
+  const context = canvas.getContext('2d')
+  setTimeout(async () => {
+    await segmentPerson(localVideo, canvas)
+  }, 2000)
 }
 function startMaskedVideo() {
   const _localVideo = localVideo as any
