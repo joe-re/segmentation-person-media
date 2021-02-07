@@ -2,10 +2,8 @@ import { segmentPerson } from './src/index'
 
 const startVideoButton = document.getElementById('start_video_button') as HTMLButtonElement
 const localVideo = document.getElementById('local_video') as HTMLVideoElement
-const canvas = document.getElementById('canvas') as HTMLCanvasElement
+const maskedVideo = document.getElementById('masked_video') as HTMLVideoElement
 export async function startVideo() {
-  //const mediaConstraints = {video: true, audio: true}; 
-  //const mediaConstraints = {video: true, audio: false}; 
   const mediaConstraints = { video: { width: 640, height: 480 }, audio: false };
 
   const localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints).catch(err => {
@@ -17,15 +15,16 @@ export async function startVideo() {
   await localVideo.play().catch(err => console.error('local play ERROR:', err));
   localVideo.volume = 0;
 
-  startCanvasVideo();
-  // updateUI();
+  startMaskedVideo();
   segmentPerson(localVideo)
 }
-function startCanvasVideo() {
-  // writeCanvasString('initalizing BodyPix');
-  // contineuAnimation = true;
-  // animationId = window.requestAnimationFrame(updateCanvas);
-  // canvasStream = canvas.captureStream();
+function startMaskedVideo() {
+  const _localVideo = localVideo as any
+  if ((localVideo as any).captureStream) {
+    const stream = _localVideo.captureStream();
+    maskedVideo.srcObject = stream
+    maskedVideo.play()
+  }
 
   // updateSegment();
 }
