@@ -4,8 +4,13 @@
   "main": "index.js",
   "author": "joe-re <joe.tialtngo@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "dev": "yarn web-dev-server --open . --node-resolve",
+    "dev:build": "yarn esbuild main.ts --bundle --outfile=out.js"
+  },
   "dependencies": {
     "@tensorflow-models/body-pix": "^2.0.5",
+    "@tensorflow/tfjs": "^3.0.0",
     "@tensorflow/tfjs-converter": "^3.0.0",
     "@tensorflow/tfjs-core": "^3.0.0",
     "typescript": "^4.1.3"
