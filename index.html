@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>BodyPix</title>
+</head>
+
+<body>
+  <div>
+    <button id="start_video_button" onclick="startVideo()">Start Video</button>
+    local video<br />
+    <video id="local_video" width="640px" height="480px"
+      style="border: solid black 1px; width:160px; height:120px"></video>
+    <br />
+    masked video<br />
+    <canvas id="canvas" width="640px" height="480px" style="border: solid 1px black; width:320px; height:240px;" />
+  </div>
+  <script>
+    const localVideo = document.getElementById('local_video');
+    const canvas = document.getElementById('canvas');
+    async function startVideo() {
+      //const mediaConstraints = {video: true, audio: true}; 
+      //const mediaConstraints = {video: true, audio: false}; 
+      const mediaConstraints = { video: { width: 640, height: 480 }, audio: false };
+
+      localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints).catch(err => {
+        console.error('media ERROR:', err);
+        return;
+      });
+
+      localVideo.srcObject = localStream;
+      await localVideo.play().catch(err => console.error('local play ERROR:', err));
+      localVideo.volume = 0;
+
+      startCanvasVideo();
+      updateUI();
+    }
+  </script>
+</body>
+
+</html>
