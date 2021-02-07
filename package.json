@@ -1,0 +1,15 @@
+{
+  "name": "virtual-camera",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "joe-re <joe.tialtngo@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@tensorflow-models/body-pix": "^2.0.5",
+    "@tensorflow/tfjs-converter": "^3.0.0",
+    "@tensorflow/tfjs-core": "^3.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.8.42"
+  }
+}
