@@ -1,4 +1,4 @@
-import { SegmentationVideo, segmentPerson } from './src/index'
+import { SegmentationVideo } from './src/index'
 
 const startVideoButton = document.getElementById('start_video_button') as HTMLButtonElement
 const localVideo = document.getElementById('local_video') as HTMLVideoElement
@@ -17,10 +17,10 @@ export async function startVideo() {
   localVideo.volume = 0;
 
   startMaskedVideo();
-  const context = canvas.getContext('2d')
-  setTimeout(async () => {
-    await segmentPerson(localVideo, canvas)
-  }, 2000)
+  // const context = canvas.getContext('2d')
+  // setTimeout(async () => {
+  //   await segmentPerson(localVideo, canvas)
+  // }, 2000)
 }
 async function startMaskedVideo() {
   const segmentationVideo = new SegmentationVideo()

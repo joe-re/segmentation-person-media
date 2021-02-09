@@ -1,5 +1,6 @@
 import * as bodyPix from '@tensorflow-models/body-pix';
 import '@tensorflow/tfjs';
+import { createLoopVariable } from 'typescript';
 
 interface CanvasElement extends HTMLCanvasElement {
   captureStream(frameRate?: number): MediaStream;
@@ -32,12 +33,11 @@ export class SegmentationVideo {
   }
   createMaskedStream(src: HTMLVideoElement) {
     const stream = this.canvas.captureStream(30)
-    setInterval(() => {
-      console.log('--- update stream ---')
+    const loop = (() => {
       this.updateStream(src)
-    }, 100)
-    // window.requestAnimationFrame(() => {
-    // })
+      requestAnimationFrame(loop)
+    })
+    requestAnimationFrame(loop)
     return stream
   }
   private async updateStream(src: HTMLVideoElement) {
