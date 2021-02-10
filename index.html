@@ -8,11 +8,17 @@
 <body>
   <div>
     <button id="start_video_button">Start Video</button>
+    <input type="radio" name="selection" id="selection-mask">
+    <label for="selection-mask">Mask</label>
+    <input type="radio" name="selection" id="selection-change-background" value="mask">
+    <label for="selection-change-background" value="change-background">Change BackGround</label>
+
     local video<br />
     <video id="local_video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
-    masked video<br />
+
     <video id="masked_video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
     <canvas id="canvas"></canvas>
+    <img id="image" src="./image/mountain.jpg"  width="640px" height="480px" />
   </div>
   <script type="module" src="./out.js"></script>
 </body>
