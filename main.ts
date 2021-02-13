@@ -38,30 +38,32 @@ export async function pauseVideo() {
 
 async function startMaskedVideo() {
   const segmentationVideo = new SegmentationVideo()
-  await segmentationVideo.init()
-  const stream = segmentationVideo.createMaskedStream(localVideo)
+  await segmentationVideo.loadModel()
+  const stream = segmentationVideo.createMaskedStream({ src: localVideo })
   maskedVideo.srcObject = stream
   maskedVideo.play()
 }
 
 async function startChangedBackgroundVideo() {
   const segmentationVideo = new SegmentationVideo()
-  await segmentationVideo.init()
+  await segmentationVideo.loadModel()
   const canvas = document.createElement('canvas')
   canvas.width = img.width
   canvas.height = img.height
   const ctx = canvas.getContext('2d')!
   ctx.drawImage(img, 0, 0)
   const imageData = ctx.getImageData(0, 0, img.width, img.height)
-  const stream = segmentationVideo.createChangedBackgroundStream(localVideo, imageData)
+  const stream = segmentationVideo.createChangedBackgroundStream({
+    src: localVideo, backgroundImage: imageData
+  })
   maskedVideo.srcObject = stream
   maskedVideo.play()
 }
 
 async function startBluredVideo() {
   const segmentationVideo = new SegmentationVideo()
-  await segmentationVideo.init()
-  const stream = segmentationVideo.createBluredStream(localVideo)
+  await segmentationVideo.loadModel()
+  const stream = segmentationVideo.createBluredStream({ src: localVideo })
   maskedVideo.srcObject = stream
   maskedVideo.play()
 }

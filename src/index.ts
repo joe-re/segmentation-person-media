@@ -1,50 +1,94 @@
-import * as bodyPix from '@tensorflow-models/body-pix';
-import '@tensorflow/tfjs';
+import {
+  BodyPix,
+  SemanticPersonSegmentation,
+  PersonSegmentation,
+  load,
+  toMask,
+  drawMask,
+  drawBokehEffect
+} from '@tensorflow-models/body-pix'
+import { ModelConfig, InferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
+import '@tensorflow/tfjs'
 
 interface CanvasElement extends HTMLCanvasElement {
-  captureStream(frameRate?: number): MediaStream;
+  captureStream(frameRate?: number): MediaStream
+}
+type Color = {
+  r: number
+  g: number
+  b: number
+  a: number
 }
 
+type CreateStreamArgs<T = {}> = {
+  src: HTMLVideoElement
+  frameRate?: number
+  config?: InferenceConfig
+  options?: T
+}
 export class SegmentationVideo {
-  private net: bodyPix.BodyPix | null = null
+  private net: BodyPix | null = null
   private canvas: CanvasElement
   constructor() {
     this.canvas = document.createElement('canvas') as CanvasElement
   }
-  async init() {
-    this.net = await bodyPix.load()
+  async loadModel(modelConfig?: ModelConfig) {
+    this.net = await load(modelConfig)
   }
 
-  createMaskedStream(src: HTMLVideoElement) {
-    const fgColor = { r: 0, g: 0, b: 0, a: 0 }
-    const bgColor = { r: 127, g: 127, b: 127, a: 255 }
-    const draw = (segmentation: bodyPix.SemanticPersonSegmentation) => {
-      const mask = bodyPix.toMask(segmentation, fgColor, bgColor)
-      bodyPix.drawMask(this.canvas, src, mask, 1)
+  createMaskedStream({ src, frameRate, options = {} }: CreateStreamArgs<{
+    color?: Color,
+    maskOpacity?: number,
+    maskBlurAmount?: number,
+    flipHorizontal?: boolean
+  }>) {
+    const forground = { r: 0, g: 0, b: 0, a: 0 }
+    const { color, ...drawOptions } = options
+    const background = options?.color ? options.color : { r: 0, g: 0, b: 0, a: 255 }
+    const draw = (segmentation: SemanticPersonSegmentation) => {
+      const mask = toMask(segmentation, forground, background)
+      drawMask(this.canvas, src, mask, drawOptions.maskOpacity || 1, drawOptions.maskBlurAmount, drawOptions.flipHorizontal)
     }
-    return this.createStream(src, draw)
+    return this.createStream(src, draw, frameRate)
   }
 
-  createChangedBackgroundStream(src: HTMLVideoElement, imageData: ImageData) {
-    const draw = (segmentation: bodyPix.SemanticPersonSegmentation) => {
-      const mask = this.transparentPersonSegmentation(imageData, segmentation)
-      bodyPix.drawMask(this.canvas, src, mask, 1)
+  createChangedBackgroundStream({ src, frameRate, backgroundImage, options = {} }: CreateStreamArgs<{
+    maskOpacity?: number,
+    maskBlurAmount?: number,
+    flipHorizontal?: boolean
+  }> & { backgroundImage: ImageData }) {
+    const drawOptions = options
+    const draw = (segmentation: SemanticPersonSegmentation) => {
+      const mask = this.transparentPersonSegmentation(backgroundImage, segmentation)
+      drawMask(this.canvas, src, mask, drawOptions.maskOpacity || 1, drawOptions.maskBlurAmount, drawOptions.flipHorizontal)
     }
-    return this.createStream(src, draw)
+    return this.createStream(src, draw, frameRate)
   }
 
-  createBluredStream(src: HTMLVideoElement) {
-    const draw = (segmentation: bodyPix.SemanticPersonSegmentation) => {
-      bodyPix.drawBokehEffect(this.canvas, src, segmentation, 9, 9)
+  createBluredStream({ src, frameRate, options = {} }: CreateStreamArgs<{
+     backgroundBlurAmount?: number,
+     edgeBlurAmount?: number,
+     flipHorizontal?: boolean
+  }>) {
+    const draw = (segmentation: SemanticPersonSegmentation) => {
+      drawBokehEffect(
+        this.canvas,
+        src,
+        segmentation,
+        options.backgroundBlurAmount ?? 9,
+        options.edgeBlurAmount ?? 9,
+        options.flipHorizontal
+      )
     }
-    return this.createStream(src, draw)
+    return this.createStream(src, draw, frameRate)
   }
 
   private createStream(
     src: HTMLVideoElement,
-    draw?: (segmentation: bodyPix.SemanticPersonSegmentation) => void
+    draw: (segmentation: SemanticPersonSegmentation) => void,
+    frameRate?: number
   ) {
-    const stream = this.canvas.captureStream(30)
+    const stream = this.canvas.captureStream(frameRate ?? 30)
     let animationId = -1
     const loop = (() => {
       this.updateStream(src, draw)
@@ -59,7 +103,7 @@ export class SegmentationVideo {
 
   private async updateStream(
     src: HTMLVideoElement,
-    draw?: (segmentation: bodyPix.SemanticPersonSegmentation) => void
+    draw: (segmentation: SemanticPersonSegmentation) => void
   ) {
     const segmentation = await this.net!.segmentPerson(src, { maxDetections: 1 })
     if (draw) {
@@ -67,10 +111,10 @@ export class SegmentationVideo {
     }
   }
 
-  private transparentPersonSegmentation(imageData: ImageData, segmentation: bodyPix.SemanticPersonSegmentation) {
+  private transparentPersonSegmentation(imageData: ImageData, segmentation: SemanticPersonSegmentation) {
     let multiPersonSegmentation: Array<
-      bodyPix.SemanticPersonSegmentation |
-      bodyPix.PersonSegmentation
+      SemanticPersonSegmentation |
+      PersonSegmentation
     >
 
     if (!Array.isArray(segmentation)) {
