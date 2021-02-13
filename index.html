@@ -7,14 +7,19 @@
 
 <body>
   <div>
-    <button id="start-video-button">Start Video</button>
-    <button id="pause-video-button">Pause Video</button>
-    <input type="radio" name="selection" id="selection-mask">
-    <label for="selection-mask">Mask</label>
-    <input type="radio" name="selection" id="selection-change-background" value="mask">
-    <label for="selection-change-background" value="change-background">Change BackGround</label>
+    <div>
+      <button id="start-video-button">Start Video</button>
+      <button id="pause-video-button">Pause Video</button>
+    </div>
+    <div>
+      <input type="radio" name="selection" id="selection-mask">
+      <label for="selection-mask">Mask</label>
+      <input type="radio" name="selection" id="selection-change-background" value="mask">
+      <label for="selection-change-background" value="change-background">Change BackGround</label>
+      <input type="radio" name="selection" id="selection-blur" value="mask">
+      <label for="selection-blur" value="blur">Blur</label>
+    </div>
 
-    local video<br />
     <video id="local-video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
 
     <video id="masked-video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>

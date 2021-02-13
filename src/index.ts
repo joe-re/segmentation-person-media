@@ -16,18 +16,38 @@ export class SegmentationVideo {
   }
 
   createMaskedStream(src: HTMLVideoElement) {
-    return this.createStream(src)
+    const fgColor = { r: 0, g: 0, b: 0, a: 0 }
+    const bgColor = { r: 127, g: 127, b: 127, a: 255 }
+    const draw = (segmentation: bodyPix.SemanticPersonSegmentation) => {
+      const mask = bodyPix.toMask(segmentation, fgColor, bgColor)
+      bodyPix.drawMask(this.canvas, src, mask, 1)
+    }
+    return this.createStream(src, draw)
   }
 
   createChangedBackgroundStream(src: HTMLVideoElement, imageData: ImageData) {
-    return this.createStream(src, imageData)
+    const draw = (segmentation: bodyPix.SemanticPersonSegmentation) => {
+      const mask = this.transparentPersonSegmentation(imageData, segmentation)
+      bodyPix.drawMask(this.canvas, src, mask, 1)
+    }
+    return this.createStream(src, draw)
   }
 
-  private createStream(src: HTMLVideoElement, imageData?: ImageData) {
+  createBluredStream(src: HTMLVideoElement) {
+    const draw = (segmentation: bodyPix.SemanticPersonSegmentation) => {
+      bodyPix.drawBokehEffect(this.canvas, src, segmentation, 9, 9)
+    }
+    return this.createStream(src, draw)
+  }
+
+  private createStream(
+    src: HTMLVideoElement,
+    draw?: (segmentation: bodyPix.SemanticPersonSegmentation) => void
+  ) {
     const stream = this.canvas.captureStream(30)
     let animationId = -1
     const loop = (() => {
-      this.updateStream(src, imageData)
+      this.updateStream(src, draw)
       animationId = requestAnimationFrame(loop)
     })
     animationId = requestAnimationFrame(loop)
@@ -37,20 +57,17 @@ export class SegmentationVideo {
     return stream
   }
 
-  private async updateStream(src: HTMLVideoElement, imageData?: ImageData) {
+  private async updateStream(
+    src: HTMLVideoElement,
+    draw?: (segmentation: bodyPix.SemanticPersonSegmentation) => void
+  ) {
     const segmentation = await this.net!.segmentPerson(src, { maxDetections: 1 })
-    const fgColor = { r: 0, g: 0, b: 0, a: 0 }
-    const bgColor = { r: 127, g: 127, b: 127, a: 255 }
-    if (!imageData) {
-      const mask = bodyPix.toMask(segmentation, fgColor, bgColor)
-      bodyPix.drawMask(this.canvas, src, mask, 1)
-    } else {
-      const mask = this.transparent(imageData, segmentation)
-      bodyPix.drawMask(this.canvas, src, mask, 1)
+    if (draw) {
+      draw(segmentation)
     }
   }
 
-  private transparent(imageData: ImageData, segmentation: bodyPix.SemanticPersonSegmentation) {
+  private transparentPersonSegmentation(imageData: ImageData, segmentation: bodyPix.SemanticPersonSegmentation) {
     let multiPersonSegmentation: Array<
       bodyPix.SemanticPersonSegmentation |
       bodyPix.PersonSegmentation

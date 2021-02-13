@@ -7,8 +7,9 @@ const maskedVideo = document.getElementById('masked-video') as HTMLVideoElement
 const img = document.getElementById('image') as HTMLImageElement
 const selectionMask = document.getElementById('selection-mask') as HTMLInputElement
 const selectionChangeBackGround = document.getElementById('selection-change-background') as HTMLInputElement
+const selectionBlur = document.getElementById('selection-blur') as HTMLInputElement
 
-let selection: 'mask' | 'change-background' = 'mask'
+let selection: 'mask' | 'change-background' | 'blur' = 'mask'
 
 export async function startVideo() {
   const mediaConstraints = { video: { width: 640, height: 480 }, audio: false };
@@ -24,8 +25,10 @@ export async function startVideo() {
 
   if (selection === 'mask') {
     startMaskedVideo()
-  } else {
+  } else if (selection === 'change-background') {
     startChangedBackgroundVideo()
+  } else {
+    startBluredVideo()
   }
 }
 
@@ -55,6 +58,14 @@ async function startChangedBackgroundVideo() {
   maskedVideo.play()
 }
 
+async function startBluredVideo() {
+  const segmentationVideo = new SegmentationVideo()
+  await segmentationVideo.init()
+  const stream = segmentationVideo.createBluredStream(localVideo)
+  maskedVideo.srcObject = stream
+  maskedVideo.play()
+}
+
 startVideoButton.onclick = function() {
   startVideo()
 }
@@ -68,4 +79,7 @@ selectionMask.onclick = function() {
 }
 selectionChangeBackGround.onclick = function () {
   selection = 'change-background'
+}
+selectionBlur.onclick = function () {
+  selection = 'blur'
 }
