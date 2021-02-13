@@ -5,22 +5,6 @@ interface CanvasElement extends HTMLCanvasElement {
   captureStream(frameRate?: number): MediaStream;
 }
 
-export async function segmentPerson(video: HTMLVideoElement, canvas: HTMLCanvasElement) {
-  // load the BodyPix model from a checkpoint
-  const net = await bodyPix.load();
-  const segmentation = await net.segmentPerson(video)
-  const fgColor = { r: 0, g: 0, b: 0, a: 0 };
-  const bgColor = { r: 127, g: 127, b: 127, a: 255 };
-  const mask = bodyPix.toMask(segmentation, fgColor, bgColor)
-  bodyPix.drawMask(canvas, video, mask, 1.0, 3)
-}
-
-let net: bodyPix.BodyPix
-export async function create() {
-  net = await bodyPix.load()
-  return segmentPerson
-}
- 
 export class SegmentationVideo {
   private net: bodyPix.BodyPix | null = null
   private canvas: CanvasElement
@@ -30,15 +14,29 @@ export class SegmentationVideo {
   async init() {
     this.net = await bodyPix.load()
   }
+
   createMaskedStream(src: HTMLVideoElement) {
+    return this.createStream(src)
+  }
+
+  createChangedBackgroundStream(src: HTMLVideoElement, imageData: ImageData) {
+    return this.createStream(src, imageData)
+  }
+
+  private createStream(src: HTMLVideoElement, imageData?: ImageData) {
     const stream = this.canvas.captureStream(30)
+    let animationId = -1
     const loop = (() => {
-      this.updateStream(src)
-      requestAnimationFrame(loop)
+      this.updateStream(src, imageData)
+      animationId = requestAnimationFrame(loop)
     })
-    requestAnimationFrame(loop)
+    animationId = requestAnimationFrame(loop)
+    src.onpause = () => {
+      cancelAnimationFrame(animationId)
+    }
     return stream
   }
+
   private async updateStream(src: HTMLVideoElement, imageData?: ImageData) {
     const segmentation = await this.net!.segmentPerson(src, { maxDetections: 1 })
     const fgColor = { r: 0, g: 0, b: 0, a: 0 }
@@ -50,16 +48,6 @@ export class SegmentationVideo {
       const mask = this.transparent(imageData, segmentation)
       bodyPix.drawMask(this.canvas, src, mask, 1)
     }
-  }
-
-  createChangedBackgroundStream(src: HTMLVideoElement, imageData: ImageData) {
-    const stream = this.canvas.captureStream(30)
-    const loop = (() => {
-      this.updateStream(src, imageData)
-      requestAnimationFrame(loop)
-    })
-    requestAnimationFrame(loop)
-    return stream
   }
 
   private transparent(imageData: ImageData, segmentation: bodyPix.SemanticPersonSegmentation) {
