@@ -2,7 +2,7 @@ import {
   SemanticPersonSegmentation,
 } from '@tensorflow-models/body-pix'
 import { InferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
-import { get, getDrawChangeBackgroundFn, getDrawMaskFn } from './BodyPix'
+import { get, getDrawBlurFn, getDrawChangeBackgroundFn, getDrawMaskFn } from './BodyPix'
 type Color = {
   r: number
   g: number
@@ -42,6 +42,17 @@ export async function createChangedBackgroundImageData({ src, backgroundImage, o
 }> & { backgroundImage: HTMLImageElement | HTMLCanvasElement | ImageData }) {
   const canvas = document.createElement('canvas') as CanvasElement
   await drawImageData(src, getDrawChangeBackgroundFn({ src, canvas, backgroundImage, options }))
+  const ctx = canvas.getContext('2d')!
+  return ctx.getImageData(0, 0, src.width, src.height)
+}
+
+export async function createBluredImageData({ src, options = {} }: CreateImageDataArgs<{
+     backgroundBlurAmount?: number,
+     edgeBlurAmount?: number,
+     flipHorizontal?: boolean
+}>) {
+  const canvas = document.createElement('canvas') as CanvasElement
+  await drawImageData(src, getDrawBlurFn({ src, canvas, options }))
   const ctx = canvas.getContext('2d')!
   return ctx.getImageData(0, 0, src.width, src.height)
 }

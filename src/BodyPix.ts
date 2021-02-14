@@ -1,4 +1,4 @@
-import { BodyPix, load, SemanticPersonSegmentation, PersonSegmentation, toMask, drawMask } from '@tensorflow-models/body-pix'
+import { BodyPix, load, SemanticPersonSegmentation, PersonSegmentation, toMask, drawMask, drawBokehEffect } from '@tensorflow-models/body-pix'
 import { ModelConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
 
 let net: BodyPix | null = null
@@ -29,6 +29,11 @@ type MaskOptions = {
   flipHorizontal?: boolean
 }
 
+type BlurOption = {
+   backgroundBlurAmount?: number,
+   edgeBlurAmount?: number,
+   flipHorizontal?: boolean
+}
 export function getDrawMaskFn({
   canvas,
   src,
@@ -65,6 +70,28 @@ export function getDrawChangeBackgroundFn({
     }
     const mask = transparentPersonSegmentation(backgroundImageData, segmentation)
     drawMask(canvas, resizeImageToFitElementSize(src), mask, options.maskOpacity || 1, options.maskBlurAmount, options.flipHorizontal)
+  }
+  return draw
+}
+
+export function getDrawBlurFn({
+  canvas,
+  src,
+  options = {}
+}: {
+  canvas: CanvasElement,
+  src: ImageType,
+  options?: BlurOption
+}) {
+  const draw = (segmentation: SemanticPersonSegmentation) => {
+    drawBokehEffect(
+      canvas,
+      src,
+      segmentation,
+      options.backgroundBlurAmount ?? 9,
+      options.edgeBlurAmount ?? 9,
+      options.flipHorizontal
+    )
   }
   return draw
 }

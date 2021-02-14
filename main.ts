@@ -151,6 +151,10 @@ async function segmentPersonImage() {
     maskedImageData = await segmentationMedia.createChangedBackgroundImageData({
       src: personImage, backgroundImage: imageData
     })
+  } else if (selection === 'blur') {
+    maskedImageData = await segmentationMedia.createBluredImageData({
+      src: personImage
+    })
   }
   if (!maskedImageData) {
     throw new Error('failed to create maskedImageData')

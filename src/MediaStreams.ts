@@ -1,11 +1,9 @@
 import {
   SemanticPersonSegmentation,
   PersonSegmentation,
-  drawMask,
-  drawBokehEffect,
 } from '@tensorflow-models/body-pix'
 import { InferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
-import { get, getDrawMaskFn, getDrawChangeBackgroundFn } from './BodyPix'
+import { get, getDrawMaskFn, getDrawChangeBackgroundFn, getDrawBlurFn } from './BodyPix'
 type Color = {
   r: number
   g: number
@@ -49,17 +47,7 @@ export function createBluredStream({ src, frameRate, options = {} }: CreateStrea
      flipHorizontal?: boolean
 }>) {
   const canvas = document.createElement('canvas') as CanvasElement
-  const draw = (segmentation: SemanticPersonSegmentation) => {
-    drawBokehEffect(
-      canvas,
-      src,
-      segmentation,
-      options.backgroundBlurAmount ?? 9,
-      options.edgeBlurAmount ?? 9,
-      options.flipHorizontal
-    )
-  }
-  return createStream(src, canvas, draw, frameRate)
+  return createStream(src, canvas, getDrawBlurFn({ canvas, src, options }), frameRate)
 }
 
 function createStream(
@@ -88,30 +76,4 @@ async function updateStream(
   const net = get()
   const segmentation = await net.segmentPerson(src, { maxDetections: 1 })
   draw(segmentation)
-}
-
-function transparentPersonSegmentation(imageData: ImageData, segmentation: SemanticPersonSegmentation) {
-  let multiPersonSegmentation: Array<
-    SemanticPersonSegmentation |
-    PersonSegmentation
-  >
-
-  if (!Array.isArray(segmentation)) {
-    multiPersonSegmentation = [segmentation];
-  } else {
-    multiPersonSegmentation = segmentation;
-  }
-  const tranparented = new Uint8ClampedArray(imageData.data)
-  const { height, width } = segmentation
-  for (let i = 0; i < height; i++) {
-    for (let j = 0; j < width; j++) {
-      const n = i * width + j
-      for (let k = 0; k < multiPersonSegmentation.length; k++) {
-        if (multiPersonSegmentation[k].data[n]) {
-          tranparented[4 * n + 3] = 0
-        }
-      }
-    }
-  }
-  return new ImageData(tranparented, width, height)
 }
