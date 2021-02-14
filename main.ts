@@ -31,11 +31,19 @@ function hexToRgb(hex: string) {
   }
 }
 
-function getSelectedBackgroundImage() {
-  return Array.prototype.find.call(backgroundImages, (image) => {
+function getSelectedBackgroundImage(src: HTMLVideoElement | HTMLImageElement) {
+  const canvas = document.createElement('canvas')
+  canvas.width = src.width
+  canvas.height = src.height
+  const img: HTMLImageElement = Array.prototype.find.call(backgroundImages, (image) => {
     return image.className.includes('selected')
   })
+  const ctx = canvas.getContext('2d')!
+  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, src.width, src.height)
+  const imageData = ctx.getImageData(0, 0, src.width, src.height)
+  return imageData
 }
+
 
 async function startVideo() {
   if (initialized) {
@@ -62,13 +70,7 @@ async function startVideo() {
       const color = hexToRgb(colorPicker.value)
       stream = segmentationMedia.createMaskedStream({ src: localVideo, options: { color } })
     } else if (selection === 'change-background') {
-      const canvas = document.createElement('canvas')
-      canvas.width = localVideo.width
-      canvas.height = localVideo.height
-      const ctx = canvas.getContext('2d')!
-      const img = getSelectedBackgroundImage()
-      ctx.drawImage(img, 0, 0)
-      const imageData = ctx.getImageData(0, 0, localVideo.width, localVideo.height)
+      const imageData = getSelectedBackgroundImage(localVideo)
       stream = segmentationMedia.createChangedBackgroundStream({ src: localVideo, backgroundImage: imageData })
     } else {
       stream = segmentationMedia.createBluredStream({ src: localVideo })
@@ -107,7 +109,7 @@ function changeEffect() {
   if (srcSelection === 'camera') {
     playVideo()
   } else {
-    segmentePersonImage()
+    segmentPersonImage()
   }
 }
 
@@ -141,15 +143,25 @@ for (const img of backgroundImages) {
   img.onclick = () => {
     offAllBackgroundImageSelection()
     img.classList.add('selected')
-    playVideo()
+    changeEffect()
   }
 }
 
-async function segmentePersonImage() {
-  console.log('segmentePersonImage')
+async function segmentPersonImage() {
   const segmentationMedia = await load()
-  const color = hexToRgb(colorPicker.value)
-  const maskedImageData = await segmentationMedia.createMaskedImageData({ src: personImage, options: { color }})
+  let maskedImageData: ImageData | null = null
+  if (selection === 'mask') {
+    const color = hexToRgb(colorPicker.value)
+    maskedImageData = await segmentationMedia.createMaskedImageData({ src: personImage, options: { color }})
+  } else if (selection === 'change-background') {
+    const imageData = getSelectedBackgroundImage(personImage)
+    maskedImageData = await segmentationMedia.createChangedBackgroundImageData({
+      src: personImage, backgroundImage: imageData
+    })
+  }
+  if (!maskedImageData) {
+    throw new Error('failed to create maskedImageData')
+  }
   maskedPersonImage.width = maskedImageData.width
   maskedPersonImage.height = maskedImageData.height
   const maskedCtx = maskedPersonImage.getContext('2d')
@@ -167,5 +179,5 @@ srcSelectionImageData.onclick = () => {
   srcSelection = 'image-data'
   srcCamera.style.display = 'none'
   srcImageData.style.display = 'block' 
-  segmentePersonImage()
+  segmentPersonImage()
 }

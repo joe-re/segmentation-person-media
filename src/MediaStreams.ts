@@ -1,12 +1,11 @@
 import {
   SemanticPersonSegmentation,
   PersonSegmentation,
-  toMask,
   drawMask,
   drawBokehEffect,
 } from '@tensorflow-models/body-pix'
 import { InferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
-import { get, getDrawMaskFn } from './BodyPix'
+import { get, getDrawMaskFn, getDrawChangeBackgroundFn } from './BodyPix'
 type Color = {
   r: number
   g: number
@@ -41,12 +40,7 @@ export function createChangedBackgroundStream({ src, frameRate, backgroundImage,
   flipHorizontal?: boolean
 }> & { backgroundImage: ImageData }) {
   const canvas = document.createElement('canvas') as CanvasElement
-  const drawOptions = options
-  const draw = (segmentation: SemanticPersonSegmentation) => {
-    const mask = transparentPersonSegmentation(backgroundImage, segmentation)
-    drawMask(canvas, src, mask, drawOptions.maskOpacity || 1, drawOptions.maskBlurAmount, drawOptions.flipHorizontal)
-  }
-  return createStream(src, canvas, draw, frameRate)
+  return createStream(src, canvas, getDrawChangeBackgroundFn({ src, canvas, backgroundImage, options }), frameRate)
 }
 
 export function createBluredStream({ src, frameRate, options = {} }: CreateStreamArgs<{
