@@ -1,5 +1,9 @@
 import { load } from './src/index'
 
+const srcSelectionCamera = document.getElementById('src-selection-camera') as HTMLInputElement
+const srcSelectionImageData = document.getElementById('src-selection-image-data') as HTMLInputElement
+const srcCamera = document.getElementById('src-camera') as HTMLInputElement
+const srcImageData = document.getElementById('src-image-data') as HTMLInputElement
 const localVideo = document.getElementById('local-video') as HTMLVideoElement
 const maskedVideo = document.getElementById('masked-video') as HTMLVideoElement
 const selectionMask = document.getElementById('selection-mask') as HTMLInputElement
@@ -9,10 +13,13 @@ const selectionBlur = document.getElementById('selection-blur') as HTMLInputElem
 const backgroundImages = document.getElementsByClassName('for-change-background-option-image') as HTMLCollectionOf<HTMLImageElement>
 const maskOption = document.getElementById('for-mask-option')
 const changeBackgroundOption = document.getElementById('for-change-background-option')
+const personImage = document.getElementById('person-image') as HTMLImageElement
+const maskedPersonImage = document.getElementById('masked-person-image') as HTMLCanvasElement
 
 let selection: 'mask' | 'change-background' | 'blur' = 'mask'
 
 let initialized = false
+
 
 function hexToRgb(hex: string) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -96,24 +103,32 @@ function changeOptionVisibility() {
   }
 }
 
+function changeEffect() {
+  if (srcSelection === 'camera') {
+    playVideo()
+  } else {
+    segmentePersonImage()
+  }
+}
+
 selectionMask.onclick = function() {
   selection = 'mask'
   changeOptionVisibility()
-  playVideo()
+  changeEffect()
 }
 selectionChangeBackGround.onclick = function () {
   selection = 'change-background'
   changeOptionVisibility()
-  playVideo()
+  changeEffect()
 }
 selectionBlur.onclick = function () {
   selection = 'blur'
   changeOptionVisibility()
-  playVideo()
+  changeEffect()
 }
 
 colorPicker.onchange = function () {
-  playVideo()
+  changeEffect()
 }
 
 function offAllBackgroundImageSelection () {
@@ -128,4 +143,29 @@ for (const img of backgroundImages) {
     img.classList.add('selected')
     playVideo()
   }
+}
+
+async function segmentePersonImage() {
+  console.log('segmentePersonImage')
+  const segmentationMedia = await load()
+  const color = hexToRgb(colorPicker.value)
+  const maskedImageData = await segmentationMedia.createMaskedImageData({ src: personImage, options: { color }})
+  maskedPersonImage.width = maskedImageData.width
+  maskedPersonImage.height = maskedImageData.height
+  const maskedCtx = maskedPersonImage.getContext('2d')
+  maskedCtx!.putImageData(maskedImageData, 0, 0)
+}
+
+let srcSelection: 'camera' | 'image-data' = 'camera'
+srcSelectionCamera.onclick = () => {
+  srcSelection = 'camera'
+  srcCamera.style.display = 'block'
+  srcImageData.style.display = 'none' 
+}
+
+srcSelectionImageData.onclick = () => {
+  srcSelection = 'image-data'
+  srcCamera.style.display = 'none'
+  srcImageData.style.display = 'block' 
+  segmentePersonImage()
 }

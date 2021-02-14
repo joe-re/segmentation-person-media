@@ -56,7 +56,7 @@ export function createChangedBackgroundStream({ src, frameRate, backgroundImage,
   return createStream(src, canvas, draw, frameRate)
 }
 
-export function  createBluredStream({ src, frameRate, options = {} }: CreateStreamArgs<{
+export function createBluredStream({ src, frameRate, options = {} }: CreateStreamArgs<{
      backgroundBlurAmount?: number,
      edgeBlurAmount?: number,
      flipHorizontal?: boolean
@@ -100,9 +100,7 @@ async function updateStream(
 ) {
   const net = get()
   const segmentation = await net.segmentPerson(src, { maxDetections: 1 })
-  if (draw) {
-    draw(segmentation)
-  }
+  draw(segmentation)
 }
 
 function transparentPersonSegmentation(imageData: ImageData, segmentation: SemanticPersonSegmentation) {

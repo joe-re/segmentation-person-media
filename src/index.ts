@@ -1,6 +1,7 @@
 import { ModelConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
 import '@tensorflow/tfjs'
 import { createMaskedStream, createBluredStream, createChangedBackgroundStream } from './MediaStreams'
+import { createMaskedImageData } from './ImageData'
 import { loadModel } from './BodyPix'
 
 export async function load(modelConfig?: ModelConfig) {
@@ -8,6 +9,7 @@ export async function load(modelConfig?: ModelConfig) {
   return {
     createMaskedStream,
     createChangedBackgroundStream,
-    createBluredStream
+    createBluredStream,
+    createMaskedImageData
   }
 }
