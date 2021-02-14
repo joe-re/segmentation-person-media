@@ -1,4 +1,4 @@
-import { SegmentationVideo } from './src/index'
+import { load } from './src/index'
 
 const startVideoButton = document.getElementById('start-video-button') as HTMLButtonElement
 const pauseVideoButton = document.getElementById('pause-video-button') as HTMLButtonElement
@@ -22,50 +22,28 @@ export async function startVideo() {
   localVideo.srcObject = localStream;
   await localVideo.play().catch(err => console.error('failed to play local video:', err))
   localVideo.volume = 0
+  const segmentationMedia = await load()
 
+  let stream: MediaStream;
   if (selection === 'mask') {
-    startMaskedVideo()
+    stream = segmentationMedia.createMaskedStream({ src: localVideo })
   } else if (selection === 'change-background') {
-    startChangedBackgroundVideo()
+    const canvas = document.createElement('canvas')
+    canvas.width = img.width
+    canvas.height = img.height
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(img, 0, 0)
+    const imageData = ctx.getImageData(0, 0, img.width, img.height)
+    stream = segmentationMedia.createChangedBackgroundStream({ src: localVideo, backgroundImage: imageData })
   } else {
-    startBluredVideo()
+    stream = segmentationMedia.createBluredStream({ src: localVideo })
   }
+  maskedVideo.srcObject = stream
+  maskedVideo.play()
 }
 
 export async function pauseVideo() {
   localVideo.pause()
-}
-
-async function startMaskedVideo() {
-  const segmentationVideo = new SegmentationVideo()
-  await segmentationVideo.loadModel()
-  const stream = segmentationVideo.createMaskedStream({ src: localVideo })
-  maskedVideo.srcObject = stream
-  maskedVideo.play()
-}
-
-async function startChangedBackgroundVideo() {
-  const segmentationVideo = new SegmentationVideo()
-  await segmentationVideo.loadModel()
-  const canvas = document.createElement('canvas')
-  canvas.width = img.width
-  canvas.height = img.height
-  const ctx = canvas.getContext('2d')!
-  ctx.drawImage(img, 0, 0)
-  const imageData = ctx.getImageData(0, 0, img.width, img.height)
-  const stream = segmentationVideo.createChangedBackgroundStream({
-    src: localVideo, backgroundImage: imageData
-  })
-  maskedVideo.srcObject = stream
-  maskedVideo.play()
-}
-
-async function startBluredVideo() {
-  const segmentationVideo = new SegmentationVideo()
-  await segmentationVideo.loadModel()
-  const stream = segmentationVideo.createBluredStream({ src: localVideo })
-  maskedVideo.srcObject = stream
-  maskedVideo.play()
 }
 
 startVideoButton.onclick = function() {
