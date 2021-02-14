@@ -1,17 +1,35 @@
 import { load } from './src/index'
 
-const startVideoButton = document.getElementById('start-video-button') as HTMLButtonElement
-const pauseVideoButton = document.getElementById('pause-video-button') as HTMLButtonElement
 const localVideo = document.getElementById('local-video') as HTMLVideoElement
 const maskedVideo = document.getElementById('masked-video') as HTMLVideoElement
-const img = document.getElementById('image') as HTMLImageElement
 const selectionMask = document.getElementById('selection-mask') as HTMLInputElement
+const colorPicker = document.getElementById('color') as HTMLInputElement
 const selectionChangeBackGround = document.getElementById('selection-change-background') as HTMLInputElement
 const selectionBlur = document.getElementById('selection-blur') as HTMLInputElement
+const backgroundImages = document.getElementsByClassName('for-change-background-option-image') as HTMLCollectionOf<HTMLImageElement>
+const maskOption = document.getElementById('for-mask-option')
+const changeBackgroundOption = document.getElementById('for-change-background-option')
 
 let selection: 'mask' | 'change-background' | 'blur' = 'mask'
 
 let initialized = false
+
+function hexToRgb(hex: string) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return {
+    r: parseInt(result![1], 16),
+    g: parseInt(result![2], 16),
+    b: parseInt(result![3], 16),
+    a: 255
+  }
+}
+
+function getSelectedBackgroundImage() {
+  return Array.prototype.find.call(backgroundImages, (image) => {
+    return image.className.includes('selected')
+  })
+}
+
 async function startVideo() {
   if (initialized) {
     playVideo()
@@ -34,14 +52,17 @@ async function startVideo() {
   localVideo.onplay = () => {
     let stream: MediaStream;
     if (selection === 'mask') {
-      stream = segmentationMedia.createMaskedStream({ src: localVideo })
+      const color = hexToRgb(colorPicker.value)
+      stream = segmentationMedia.createMaskedStream({ src: localVideo, options: { color } })
     } else if (selection === 'change-background') {
       const canvas = document.createElement('canvas')
-      canvas.width = img.width
-      canvas.height = img.height
+      canvas.width = localVideo.width
+      canvas.height = localVideo.height
       const ctx = canvas.getContext('2d')!
+      const img = getSelectedBackgroundImage()
+      console.log(img)
       ctx.drawImage(img, 0, 0)
-      const imageData = ctx.getImageData(0, 0, img.width, img.height)
+      const imageData = ctx.getImageData(0, 0, localVideo.width, localVideo.height)
       stream = segmentationMedia.createChangedBackgroundStream({ src: localVideo, backgroundImage: imageData })
     } else {
       stream = segmentationMedia.createBluredStream({ src: localVideo })
@@ -63,20 +84,41 @@ async function pauseVideo() {
   localVideo.pause()
 }
 
-startVideoButton.onclick = function() {
-  startVideo()
-}
-
-pauseVideoButton.onclick = function() {
-  pauseVideo()
-}
+startVideo()
 
 selectionMask.onclick = function() {
   selection = 'mask'
+  maskOption!.style.visibility = 'visible'
+  changeBackgroundOption!.style.visibility = 'hidden'
+  playVideo()
 }
 selectionChangeBackGround.onclick = function () {
   selection = 'change-background'
+  maskOption!.style.visibility = 'hidden'
+  changeBackgroundOption!.style.visibility = 'visible'
+  playVideo()
 }
 selectionBlur.onclick = function () {
   selection = 'blur'
+  maskOption!.style.visibility = 'hidden'
+  changeBackgroundOption!.style.visibility = 'hidden'
+  playVideo()
+}
+
+colorPicker.onchange = function () {
+  playVideo()
+}
+
+function offAllBackgroundImageSelection () {
+  for (const img of backgroundImages) {
+    img.classList.remove('selected')
+  }
+}
+
+for (const img of backgroundImages) {
+  img.onclick = () => {
+    offAllBackgroundImageSelection()
+    img.classList.add('selected')
+    playVideo()
+  }
 }

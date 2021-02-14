@@ -8,24 +8,50 @@
 <body>
   <div>
     <div>
-      <button id="start-video-button">Start Video</button>
-      <button id="pause-video-button">Pause Video</button>
+      <h3>Camera</h3>
+      <video id="local-video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
+      <video id="masked-video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
     </div>
+
     <div>
-      <input type="radio" name="selection" id="selection-mask">
-      <label for="selection-mask">Mask</label>
-      <input type="radio" name="selection" id="selection-change-background" value="mask">
-      <label for="selection-change-background" value="change-background">Change BackGround</label>
-      <input type="radio" name="selection" id="selection-blur" value="mask">
-      <label for="selection-blur" value="blur">Blur</label>
+      <h3>Choose background effect</h3>
+      <div class="background-selection">
+        <input type="radio" name="selection" id="selection-mask" value="mask" checked>
+        <label for="selection-mask">Mask</label>
+        <input type="radio" name="selection" id="selection-change-background" value="change-background">
+        <label for="selection-change-background">Change BackGround</label>
+        <input type="radio" name="selection" id="selection-blur" value="blur">
+        <label for="selection-blur">Blur</label>
+      </div>
+      <div id="for-mask-option">
+        <input type="color" id="color" value="#03FC0B">
+        <label for="color">Color</label>
+      </div>
+      <div id="for-change-background-option">
+        <img class="for-change-background-option-image selected" id="mountain-image" src="./image/mountain.jpg"  width="80px" />
+        <img class="for-change-background-option-image" id="grassland-image" src="./image/grassland.png"  width="80px" />
+        <img class="for-change-background-option-image" id="game-image" src="./image/game.png"  width="80px" />
+      </div>
     </div>
-
-    <video id="local-video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
-
-    <video id="masked-video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
-    <img id="image" src="./image/mountain.jpg"  width="640px" height="480px" />
   </div>
   <script type="module" src="./out.js"></script>
 </body>
 
 </html>
+
+<style>
+#for-change-background-option {
+  visibility: hidden;
+}
+.for-change-background-option-image {
+  border-radius: 3px;
+}
+.for-change-background-option-image:hover {
+  cursor: pointer;
+}
+.for-change-background-option-image.selected {
+  border: 2px solid;
+  border-color: deepskyblue;
+}
+
+</style>
