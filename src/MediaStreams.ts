@@ -6,7 +6,7 @@ import {
   drawBokehEffect,
 } from '@tensorflow-models/body-pix'
 import { InferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
-import { get } from './BodyPix'
+import { get, getDrawMaskFn } from './BodyPix'
 type Color = {
   r: number
   g: number
@@ -32,14 +32,7 @@ export function createMaskedStream({ src, frameRate, options = {} }: CreateStrea
   flipHorizontal?: boolean
 }>) {
   const canvas = document.createElement('canvas') as CanvasElement
-  const forground = { r: 0, g: 0, b: 0, a: 0 }
-  const { color, ...drawOptions } = options
-  const background = options?.color ? options.color : { r: 0, g: 0, b: 0, a: 255 }
-  const draw = (segmentation: SemanticPersonSegmentation) => {
-    const mask = toMask(segmentation, forground, background)
-    drawMask(canvas, src, mask, drawOptions.maskOpacity || 1, drawOptions.maskBlurAmount, drawOptions.flipHorizontal)
-  }
-  return createStream(src, canvas, draw, frameRate)
+  return createStream(src, canvas, getDrawMaskFn({ canvas, src, ...options }), frameRate)
 }
 
 export function createChangedBackgroundStream({ src, frameRate, backgroundImage, options = {} }: CreateStreamArgs<{
