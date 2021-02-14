@@ -38,7 +38,7 @@ export function createChangedBackgroundStream({ src, frameRate, backgroundImage,
   maskOpacity?: number,
   maskBlurAmount?: number,
   flipHorizontal?: boolean
-}> & { backgroundImage: ImageData }) {
+}> & { backgroundImage: HTMLImageElement | HTMLCanvasElement | ImageData }) {
   const canvas = document.createElement('canvas') as CanvasElement
   return createStream(src, canvas, getDrawChangeBackgroundFn({ src, canvas, backgroundImage, options }), frameRate)
 }

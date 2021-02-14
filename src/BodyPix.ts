@@ -51,11 +51,19 @@ export function getDrawChangeBackgroundFn({
 }: {
   canvas: CanvasElement,
   src: ImageType,
-  backgroundImage: ImageData,
+  backgroundImage: HTMLImageElement | HTMLCanvasElement | ImageData,
   options?: MaskOptions
 }) {
   const draw = (segmentation: SemanticPersonSegmentation) => {
-    const mask = transparentPersonSegmentation(backgroundImage, segmentation)
+    let backgroundImageData: ImageData
+    if (backgroundImage instanceof HTMLElement) {
+      const _canvas = resizeImageToFitElementSize(backgroundImage, { width: src.width, height: src.height })
+      const ctx = _canvas.getContext('2d')!
+      backgroundImageData = ctx.getImageData(0, 0, src.width, src.height)
+    } else {
+      backgroundImageData = backgroundImage
+    }
+    const mask = transparentPersonSegmentation(backgroundImageData, segmentation)
     drawMask(canvas, resizeImageToFitElementSize(src), mask, options.maskOpacity || 1, options.maskBlurAmount, options.flipHorizontal)
   }
   return draw
@@ -68,16 +76,17 @@ function getNatualSize(src: ImageType) {
   return { width: src.width, height: src.height }
 }
 
-function resizeImageToFitElementSize(src: ImageType) {
+function resizeImageToFitElementSize(src: ImageType, size?: { width: number, height: number }) {
   if (src instanceof HTMLCanvasElement) {
     return src
   }
   const canvas = document.createElement('canvas')
-  const { width, height } = getNatualSize(src)
-  canvas.width = src.width
-  canvas.height = src.height
+  const naturalSize = getNatualSize(src)
+  const { width, height } = size ? size : src
+  canvas.width = width
+  canvas.height = height
   const ctx = canvas.getContext('2d')!
-  ctx.drawImage(src, 0, 0, width, height, 0, 0, src.width, src.height)
+  ctx.drawImage(src, 0, 0, naturalSize.width, naturalSize.height, 0, 0, width, height)
   return canvas
 }
 

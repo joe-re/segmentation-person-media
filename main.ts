@@ -31,17 +31,10 @@ function hexToRgb(hex: string) {
   }
 }
 
-function getSelectedBackgroundImage(src: HTMLVideoElement | HTMLImageElement) {
-  const canvas = document.createElement('canvas')
-  canvas.width = src.width
-  canvas.height = src.height
-  const img: HTMLImageElement = Array.prototype.find.call(backgroundImages, (image) => {
+function getSelectedBackgroundImage(): HTMLImageElement {
+  return Array.prototype.find.call(backgroundImages, (image) => {
     return image.className.includes('selected')
   })
-  const ctx = canvas.getContext('2d')!
-  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, src.width, src.height)
-  const imageData = ctx.getImageData(0, 0, src.width, src.height)
-  return imageData
 }
 
 
@@ -70,7 +63,7 @@ async function startVideo() {
       const color = hexToRgb(colorPicker.value)
       stream = segmentationMedia.createMaskedStream({ src: localVideo, options: { color } })
     } else if (selection === 'change-background') {
-      const imageData = getSelectedBackgroundImage(localVideo)
+      const imageData = getSelectedBackgroundImage()
       stream = segmentationMedia.createChangedBackgroundStream({ src: localVideo, backgroundImage: imageData })
     } else {
       stream = segmentationMedia.createBluredStream({ src: localVideo })
@@ -154,7 +147,7 @@ async function segmentPersonImage() {
     const color = hexToRgb(colorPicker.value)
     maskedImageData = await segmentationMedia.createMaskedImageData({ src: personImage, options: { color }})
   } else if (selection === 'change-background') {
-    const imageData = getSelectedBackgroundImage(personImage)
+    const imageData = getSelectedBackgroundImage()
     maskedImageData = await segmentationMedia.createChangedBackgroundImageData({
       src: personImage, backgroundImage: imageData
     })

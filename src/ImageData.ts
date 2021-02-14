@@ -39,7 +39,7 @@ export async function createChangedBackgroundImageData({ src, backgroundImage, o
   maskOpacity?: number,
   maskBlurAmount?: number,
   flipHorizontal?: boolean
-}> & { backgroundImage: ImageData }) {
+}> & { backgroundImage: HTMLImageElement | HTMLCanvasElement | ImageData }) {
   const canvas = document.createElement('canvas') as CanvasElement
   await drawImageData(src, getDrawChangeBackgroundFn({ src, canvas, backgroundImage, options }))
   const ctx = canvas.getContext('2d')!
