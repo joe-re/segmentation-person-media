@@ -24,8 +24,11 @@
     </section>
 
     <section id="src-image-data">
-      <img id="person-image" src="./image/jobs.jpg" width="240" />
-      <canvas id="masked-person-image">
+      <div>
+        <img id="person-image" src="./image/jobs.jpg" width="240" />
+        <canvas id="masked-person-image">
+      </div>
+      <p class="attributing">"Steve Jobs Keynote", by <a href="https://www.flickr.com/photos/acaben/" target="_blank">Ben Stanfield</a>, licensed under <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank">CC BY 2.0</a>, <a href="https://www.flickr.com/photos/acaben/541420967/in/set-72157603723478753/" target="_blank">source</a></p>
     </section>
 
     <section>
@@ -74,6 +77,10 @@ h2 {
 section {
   margin-bottom: 16px;
 }
+a:link           { color: #c00 }
+a:visited        { color: #008aab }
+a:hover, a:focus { color: #00c }
+a:active         { color: #ccc }
 
 .app {
   margin: 16px;
@@ -106,7 +113,10 @@ section {
 .for-change-background-option-image.selected {
   border: 2px solid deepskyblue;
 }
-
+.attributing {
+  font-size: 10px;
+  margin-top: 4px;
+}
 #for-change-background-option {
   display: none;
 }

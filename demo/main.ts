@@ -1,4 +1,4 @@
-import { load } from './src/index'
+import { load } from '../src/index'
 
 const srcSelectionCamera = document.getElementById('src-selection-camera') as HTMLInputElement
 const srcSelectionImageData = document.getElementById('src-selection-image-data') as HTMLInputElement
