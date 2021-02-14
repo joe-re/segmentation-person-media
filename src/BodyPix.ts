@@ -1,23 +1,14 @@
 import { BodyPix, load, SemanticPersonSegmentation, PersonSegmentation, toMask, drawMask, drawBokehEffect } from '@tensorflow-models/body-pix'
-import { ModelConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
+import { ModelConfig, PersonInferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
+import { CanvasElement, ImageType, Color } from './types'
 
 let net: BodyPix | null = null
-interface CanvasElement extends HTMLCanvasElement {
-  captureStream(frameRate?: number): MediaStream
-}
-type ImageType = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement;
-type Color = {
-  r: number
-  g: number
-  b: number
-  a: number
-}
 
 export async function loadModel(modelConfig?: ModelConfig) {
   net = await load(modelConfig)
 }
 
-export function get() {
+function getModel() {
   if (!net) {
     throw new Error('Modal data has not been downloaded yet.')
   }
@@ -34,12 +25,21 @@ type BlurOption = {
    edgeBlurAmount?: number,
    flipHorizontal?: boolean
 }
+
+export type DrawFunction = (segmentation: SemanticPersonSegmentation) => void
+type DrawImageDataArgs = {
+  src: ImageType
+  draw: DrawFunction
+  config?: PersonInferenceConfig
+}
+export type SegmentationConfig = PersonInferenceConfig
+
 export function getDrawMaskFn({
   canvas,
   src,
   color = { r: 0, g: 0, b: 0, a: 255 },
   options = {}
-}: { canvas: CanvasElement, src: ImageType, color?: Color, options?: MaskOptions }) {
+}: { canvas: CanvasElement, src: ImageType, color?: Color, options?: MaskOptions }): DrawFunction {
   const forground = { r: 0, g: 0, b: 0, a: 0 }
   const draw = (segmentation: SemanticPersonSegmentation) => {
     const mask = toMask(segmentation, forground, color)
@@ -58,7 +58,7 @@ export function getDrawChangeBackgroundFn({
   src: ImageType,
   backgroundImage: HTMLImageElement | HTMLCanvasElement | ImageData,
   options?: MaskOptions
-}) {
+}): DrawFunction {
   const draw = (segmentation: SemanticPersonSegmentation) => {
     let backgroundImageData: ImageData
     if (backgroundImage instanceof HTMLElement) {
@@ -82,7 +82,7 @@ export function getDrawBlurFn({
   canvas: CanvasElement,
   src: ImageType,
   options?: BlurOption
-}) {
+}): DrawFunction {
   const draw = (segmentation: SemanticPersonSegmentation) => {
     drawBokehEffect(
       canvas,
@@ -141,4 +141,10 @@ function transparentPersonSegmentation(imageData: ImageData, segmentation: Seman
     }
   }
   return new ImageData(tranparented, width, height)
+}
+
+export async function drawImageData({ src, draw, config }: DrawImageDataArgs) {
+  const net = getModel()
+  const segmentation = await net.segmentPerson(src, config ?? { maxDetections: 1 })
+  draw(segmentation)
 }

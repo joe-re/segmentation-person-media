@@ -1,68 +1,51 @@
-import {
-  SemanticPersonSegmentation,
-} from '@tensorflow-models/body-pix'
-import { InferenceConfig } from '@tensorflow-models/body-pix/dist/body_pix_model'
-import { get, getDrawBlurFn, getDrawChangeBackgroundFn, getDrawMaskFn } from './BodyPix'
-type Color = {
-  r: number
-  g: number
-  b: number
-  a: number
-}
+import { getDrawBlurFn, getDrawChangeBackgroundFn, getDrawMaskFn, drawImageData, SegmentationConfig } from './BodyPix'
+import { CanvasElement, ImageType, Color } from './types'
 
-
-declare type ImageType = HTMLImageElement | HTMLVideoElement | HTMLCanvasElement;
 type CreateImageDataArgs<T = {}> = {
   src: ImageType
-  config?: InferenceConfig
+  config?: SegmentationConfig
   options?: T
 }
 
-interface CanvasElement extends HTMLCanvasElement {
-  captureStream(frameRate?: number): MediaStream
-}
-
-
-export async function createMaskedImageData({ src, options = {} }: CreateImageDataArgs<{
+export async function createMaskedImageData({ src, options = {}, config }: CreateImageDataArgs<{
   color?: Color,
   maskOpacity?: number,
   maskBlurAmount?: number,
   flipHorizontal?: boolean
 }>) {
   const canvas = document.createElement('canvas') as CanvasElement
-  await drawImageData(src, getDrawMaskFn({ canvas, src, ...options }))
+  await drawImageData({
+    src,
+    draw: getDrawMaskFn({ canvas, src, ...options }), config
+  })
   const ctx = canvas.getContext('2d')!
   return ctx.getImageData(0, 0, src.width, src.height)
 }
 
-export async function createChangedBackgroundImageData({ src, backgroundImage, options = {} }: CreateImageDataArgs<{
+export async function createChangedBackgroundImageData({ src, backgroundImage, options = {}, config }: CreateImageDataArgs<{
   maskOpacity?: number,
   maskBlurAmount?: number,
   flipHorizontal?: boolean
 }> & { backgroundImage: HTMLImageElement | HTMLCanvasElement | ImageData }) {
   const canvas = document.createElement('canvas') as CanvasElement
-  await drawImageData(src, getDrawChangeBackgroundFn({ src, canvas, backgroundImage, options }))
+  await drawImageData({
+    src, draw: getDrawChangeBackgroundFn({ src, canvas, backgroundImage, options }), config
+  })
   const ctx = canvas.getContext('2d')!
   return ctx.getImageData(0, 0, src.width, src.height)
 }
 
-export async function createBluredImageData({ src, options = {} }: CreateImageDataArgs<{
-     backgroundBlurAmount?: number,
-     edgeBlurAmount?: number,
-     flipHorizontal?: boolean
+export async function createBluredImageData({ src, options = {}, config }: CreateImageDataArgs<{
+  backgroundBlurAmount?: number,
+  edgeBlurAmount?: number,
+  flipHorizontal?: boolean
 }>) {
   const canvas = document.createElement('canvas') as CanvasElement
-  await drawImageData(src, getDrawBlurFn({ src, canvas, options }))
+  await drawImageData({
+    src,
+    draw: getDrawBlurFn({ src, canvas, options }),
+    config
+  })
   const ctx = canvas.getContext('2d')!
   return ctx.getImageData(0, 0, src.width, src.height)
 }
-
-async function drawImageData(
-   src: ImageType,
-   draw: (segmentation: SemanticPersonSegmentation) => void
-) {
-  const net = get()
-  const segmentation = await net.segmentPerson(src, { maxDetections: 1 })
-  draw(segmentation)
-}
-
