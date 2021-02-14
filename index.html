@@ -3,29 +3,31 @@
 
 <head>
   <title>SegmentationMedia</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="./destyle.css">
 </head>
 
 <body>
-  <div>
-    <div>
-      <h3>Camera</h3>
+  <div class="app">
+    <h1>Segmentation Media</h1>
+    <section>
+      <h2>Camera</h2>
       <video id="local-video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
       <video id="masked-video" width="640px" height="480px" style="border: solid black 1px; width:160px; height:120px"></video>
-    </div>
+    </section>
 
-    <div>
-      <h3>Choose background effect</h3>
+    <section>
+      <h2>Choose background effect</h2>
       <div class="background-selection">
         <input type="radio" name="selection" id="selection-mask" value="mask" checked>
         <label for="selection-mask">Mask</label>
         <input type="radio" name="selection" id="selection-change-background" value="change-background">
-        <label for="selection-change-background">Change BackGround</label>
+        <label for="selection-change-background">Change background</label>
         <input type="radio" name="selection" id="selection-blur" value="blur">
         <label for="selection-blur">Blur</label>
       </div>
       <div id="for-mask-option">
-        <input type="color" id="color" value="#03FC0B">
-        <label for="color">Color</label>
+        <input type="color" class="color-picker" id="color-picker" value="#03FC0B">
       </div>
       <div id="for-change-background-option">
         <img class="for-change-background-option-image selected" id="mountain-image" src="./image/mountain.jpg"  width="80px" />
@@ -33,15 +35,50 @@
         <img class="for-change-background-option-image" id="game-image" src="./image/game.png"  width="80px" />
       </div>
     </div>
-  </div>
+  </section>
   <script type="module" src="./out.js"></script>
 </body>
 
 </html>
 
 <style>
-#for-change-background-option {
-  visibility: hidden;
+body {
+  font-family: 'Noto Sans', sans-serif;
+  background-color: rgb(29, 29, 29);
+  color: rgb(200, 200, 200);
+}
+
+h1 {
+  font-weight: bold;
+  color: white;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+h2 {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+section {
+  margin-bottom: 16px;
+}
+
+.app {
+  margin: 16px;
+}
+.background-selection {
+  margin-bottom: 8px;
+}
+.color-picker {
+  width: 80px;
+  height: 60px;
+  border: 2px solid deepskyblue;
+}
+.color-picker:hover {
+  cursor: pointer;
+}
+.option {
+  margin-bottom: 8px;
 }
 .for-change-background-option-image {
   border-radius: 3px;
@@ -50,8 +87,10 @@
   cursor: pointer;
 }
 .for-change-background-option-image.selected {
-  border: 2px solid;
-  border-color: deepskyblue;
+  border: 2px solid deepskyblue;
 }
 
+#for-change-background-option {
+  display: none;
+}
 </style>

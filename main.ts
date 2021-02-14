@@ -3,7 +3,7 @@ import { load } from './src/index'
 const localVideo = document.getElementById('local-video') as HTMLVideoElement
 const maskedVideo = document.getElementById('masked-video') as HTMLVideoElement
 const selectionMask = document.getElementById('selection-mask') as HTMLInputElement
-const colorPicker = document.getElementById('color') as HTMLInputElement
+const colorPicker = document.getElementById('color-picker') as HTMLInputElement
 const selectionChangeBackGround = document.getElementById('selection-change-background') as HTMLInputElement
 const selectionBlur = document.getElementById('selection-blur') as HTMLInputElement
 const backgroundImages = document.getElementsByClassName('for-change-background-option-image') as HTMLCollectionOf<HTMLImageElement>
@@ -60,7 +60,6 @@ async function startVideo() {
       canvas.height = localVideo.height
       const ctx = canvas.getContext('2d')!
       const img = getSelectedBackgroundImage()
-      console.log(img)
       ctx.drawImage(img, 0, 0)
       const imageData = ctx.getImageData(0, 0, localVideo.width, localVideo.height)
       stream = segmentationMedia.createChangedBackgroundStream({ src: localVideo, backgroundImage: imageData })
@@ -86,22 +85,30 @@ async function pauseVideo() {
 
 startVideo()
 
+function changeOptionVisibility() {
+  maskOption!.style.display = 'none'
+  changeBackgroundOption!.style.display = 'none' 
+  if (selection === 'mask') {
+    maskOption!.style.display = 'block'
+  }
+  if (selection === 'change-background') {
+    changeBackgroundOption!.style.display = 'block' 
+  }
+}
+
 selectionMask.onclick = function() {
   selection = 'mask'
-  maskOption!.style.visibility = 'visible'
-  changeBackgroundOption!.style.visibility = 'hidden'
+  changeOptionVisibility()
   playVideo()
 }
 selectionChangeBackGround.onclick = function () {
   selection = 'change-background'
-  maskOption!.style.visibility = 'hidden'
-  changeBackgroundOption!.style.visibility = 'visible'
+  changeOptionVisibility()
   playVideo()
 }
 selectionBlur.onclick = function () {
   selection = 'blur'
-  maskOption!.style.visibility = 'hidden'
-  changeBackgroundOption!.style.visibility = 'hidden'
+  changeOptionVisibility()
   playVideo()
 }
 
