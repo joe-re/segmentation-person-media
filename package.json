@@ -12,6 +12,10 @@
     "demo:watch": "yarn esbuild ./demo/main.ts --bundle --outfile=demo/out.js --watch",
     "build": "yarn run tsc --declaration ./src/index.ts --outDir dist"
   },
+  "files": [
+    "package.json",
+    "dist"
+  ],
   "dependencies": {
     "@tensorflow-models/body-pix": "^2.0.5",
     "@tensorflow/tfjs": "^3.0.0",
