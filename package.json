@@ -1,5 +1,6 @@
 {
   "name": "segmentation-person-media",
+  "description": "Person segmentation from a media element and manipulate background in the browser",
   "version": "0.0.1",
   "main": "dist/index.js",
   "author": "joe-re <joe.tialtngo@gmail.com>",
