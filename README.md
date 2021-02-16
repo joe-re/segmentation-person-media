@@ -52,7 +52,7 @@ https://github.com/joe-re/segmentation-person-media/blob/main/demo/main.ts
 
 ## Loading the model
 
-You need to the model data to segment person at first.
+You need to load the model data to segment person at first.
 
 ```ts
 const segmentationPersonMedia = await load()
