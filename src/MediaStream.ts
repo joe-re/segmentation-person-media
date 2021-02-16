@@ -1,39 +1,83 @@
-import { drawImageData, getDrawMaskFn, getDrawChangeBackgroundFn, getDrawBlurFn, DrawFunction, SegmentationConfig } from './BodyPix'
+import {
+  drawImageData,
+  getDrawMaskFn,
+  getDrawChangeBackgroundFn,
+  getDrawBlurFn,
+  DrawFunction,
+  SegmentationConfig,
+} from './BodyPix'
 import { CanvasElement, Color } from './types'
 
-type CreateStreamArgs<T = {}> = {
+type CreateStreamArgs<T = Record<string, unknown>> = {
   src: HTMLVideoElement
   frameRate?: number
   options?: T
   config?: SegmentationConfig
 }
 
-export function createMaskedStream({ src, frameRate, options = {}, config }: CreateStreamArgs<{
-  color?: Color,
-  maskOpacity?: number,
-  maskBlurAmount?: number,
+export type ArgsCreateMaskedStrem = CreateStreamArgs<{
+  color?: Color
+  maskOpacity?: number
+  maskBlurAmount?: number
   flipHorizontal?: boolean
-}>) {
+}>
+export function createMaskedStream({
+  src,
+  frameRate,
+  options = {},
+  config,
+}: ArgsCreateMaskedStrem): MediaStream {
   const canvas = document.createElement('canvas') as CanvasElement
-  return createStream(src, canvas, getDrawMaskFn({ canvas, src, ...options }), frameRate, config)
+  return createStream(
+    src,
+    canvas,
+    getDrawMaskFn({ canvas, src, ...options }),
+    frameRate,
+    config
+  )
 }
 
-export function createChangedBackgroundStream({ src, frameRate, backgroundImage, options = {}, config }: CreateStreamArgs<{
-  maskOpacity?: number,
-  maskBlurAmount?: number,
+export type ArgsChangedBackgroundStream = CreateStreamArgs<{
+  maskOpacity?: number
+  maskBlurAmount?: number
   flipHorizontal?: boolean
-}> & { backgroundImage: HTMLImageElement | HTMLCanvasElement | ImageData }) {
+}> & { backgroundImage: HTMLImageElement | HTMLCanvasElement | ImageData }
+export function createChangedBackgroundStream({
+  src,
+  frameRate,
+  backgroundImage,
+  options = {},
+  config,
+}: ArgsChangedBackgroundStream): MediaStream {
   const canvas = document.createElement('canvas') as CanvasElement
-  return createStream(src, canvas, getDrawChangeBackgroundFn({ src, canvas, backgroundImage, options }), frameRate, config)
+  return createStream(
+    src,
+    canvas,
+    getDrawChangeBackgroundFn({ src, canvas, backgroundImage, options }),
+    frameRate,
+    config
+  )
 }
 
-export function createBluredStream({ src, frameRate, options = {}, config }: CreateStreamArgs<{
-     backgroundBlurAmount?: number,
-     edgeBlurAmount?: number,
-     flipHorizontal?: boolean
-}>) {
+export type ArgsCreateBluredStream = CreateStreamArgs<{
+  backgroundBlurAmount?: number
+  edgeBlurAmount?: number
+  flipHorizontal?: boolean
+}>
+export function createBluredStream({
+  src,
+  frameRate,
+  options = {},
+  config,
+}: ArgsCreateBluredStream): MediaStream {
   const canvas = document.createElement('canvas') as CanvasElement
-  return createStream(src, canvas, getDrawBlurFn({ canvas, src, options }), frameRate, config)
+  return createStream(
+    src,
+    canvas,
+    getDrawBlurFn({ canvas, src, options }),
+    frameRate,
+    config
+  )
 }
 
 function createStream(
@@ -45,10 +89,10 @@ function createStream(
 ) {
   const stream = canvas.captureStream(frameRate ?? 30)
   let animationId = -1
-  const loop = (() => {
+  const loop = () => {
     drawImageData({ src, draw, config })
     animationId = requestAnimationFrame(loop)
-  })
+  }
   animationId = requestAnimationFrame(loop)
   src.onpause = () => {
     cancelAnimationFrame(animationId)

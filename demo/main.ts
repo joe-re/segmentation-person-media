@@ -1,33 +1,50 @@
 import { load } from '../src/index'
 
-const srcSelectionCamera = document.getElementById('src-selection-camera') as HTMLInputElement
-const srcSelectionImageData = document.getElementById('src-selection-image-data') as HTMLInputElement
+const srcSelectionCamera = document.getElementById(
+  'src-selection-camera'
+) as HTMLInputElement
+const srcSelectionImageData = document.getElementById(
+  'src-selection-image-data'
+) as HTMLInputElement
 const srcCamera = document.getElementById('src-camera') as HTMLInputElement
-const srcImageData = document.getElementById('src-image-data') as HTMLInputElement
+const srcImageData = document.getElementById(
+  'src-image-data'
+) as HTMLInputElement
 const localVideo = document.getElementById('local-video') as HTMLVideoElement
 const maskedVideo = document.getElementById('masked-video') as HTMLVideoElement
-const selectionMask = document.getElementById('selection-mask') as HTMLInputElement
+const selectionMask = document.getElementById(
+  'selection-mask'
+) as HTMLInputElement
 const colorPicker = document.getElementById('color-picker') as HTMLInputElement
-const selectionChangeBackGround = document.getElementById('selection-change-background') as HTMLInputElement
-const selectionBlur = document.getElementById('selection-blur') as HTMLInputElement
-const backgroundImages = document.getElementsByClassName('for-change-background-option-image') as HTMLCollectionOf<HTMLImageElement>
+const selectionChangeBackGround = document.getElementById(
+  'selection-change-background'
+) as HTMLInputElement
+const selectionBlur = document.getElementById(
+  'selection-blur'
+) as HTMLInputElement
+const backgroundImages = document.getElementsByClassName(
+  'for-change-background-option-image'
+) as HTMLCollectionOf<HTMLImageElement>
 const maskOption = document.getElementById('for-mask-option')
-const changeBackgroundOption = document.getElementById('for-change-background-option')
+const changeBackgroundOption = document.getElementById(
+  'for-change-background-option'
+)
 const personImage = document.getElementById('person-image') as HTMLImageElement
-const maskedPersonImage = document.getElementById('masked-person-image') as HTMLCanvasElement
+const maskedPersonImage = document.getElementById(
+  'masked-person-image'
+) as HTMLCanvasElement
 
 let selection: 'mask' | 'change-background' | 'blur' = 'mask'
 
 let initialized = false
 
-
 function hexToRgb(hex: string) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   return {
     r: parseInt(result![1], 16),
     g: parseInt(result![2], 16),
     b: parseInt(result![3], 16),
-    a: 255
+    a: 255,
   }
 }
 
@@ -37,34 +54,43 @@ function getSelectedBackgroundImage(): HTMLImageElement {
   })
 }
 
-
 async function startVideo() {
   if (initialized) {
     playVideo()
     return
   }
   const segmentationMedia = await load()
-  const mediaConstraints = { video: { width: 640, height: 480 }, audio: false };
+  const mediaConstraints = { video: { width: 640, height: 480 }, audio: false }
 
-  const localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints).catch(err => {
-    console.error("failed to get user media:", err);
-    return
-  }) as MediaStream
+  const localStream = (await navigator.mediaDevices
+    .getUserMedia(mediaConstraints)
+    .catch((err) => {
+      console.error('failed to get user media:', err)
+      return
+    })) as MediaStream
 
-  localVideo.srcObject = localStream;
+  localVideo.srcObject = localStream
   localVideo.volume = 0
   localVideo.onloadeddata = () => {
-    localVideo.play().catch(err => console.error('failed to play local video:', err))
+    localVideo
+      .play()
+      .catch((err) => console.error('failed to play local video:', err))
   }
 
   localVideo.onplay = () => {
-    let stream: MediaStream;
+    let stream: MediaStream
     if (selection === 'mask') {
       const color = hexToRgb(colorPicker.value)
-      stream = segmentationMedia.createMaskedStream({ src: localVideo, options: { color } })
+      stream = segmentationMedia.createMaskedStream({
+        src: localVideo,
+        options: { color },
+      })
     } else if (selection === 'change-background') {
       const imageData = getSelectedBackgroundImage()
-      stream = segmentationMedia.createChangedBackgroundStream({ src: localVideo, backgroundImage: imageData })
+      stream = segmentationMedia.createChangedBackgroundStream({
+        src: localVideo,
+        backgroundImage: imageData,
+      })
     } else {
       stream = segmentationMedia.createBluredStream({ src: localVideo })
     }
@@ -78,7 +104,9 @@ function playVideo() {
   if (!localVideo.paused) {
     pauseVideo()
   }
-  localVideo.play().catch(err => console.error('failed to play local video:', err))
+  localVideo
+    .play()
+    .catch((err) => console.error('failed to play local video:', err))
 }
 
 async function pauseVideo() {
@@ -89,12 +117,12 @@ startVideo()
 
 function changeOptionVisibility() {
   maskOption!.style.display = 'none'
-  changeBackgroundOption!.style.display = 'none' 
+  changeBackgroundOption!.style.display = 'none'
   if (selection === 'mask') {
     maskOption!.style.display = 'block'
   }
   if (selection === 'change-background') {
-    changeBackgroundOption!.style.display = 'block' 
+    changeBackgroundOption!.style.display = 'block'
   }
 }
 
@@ -106,7 +134,7 @@ function changeEffect() {
   }
 }
 
-selectionMask.onclick = function() {
+selectionMask.onclick = function () {
   selection = 'mask'
   changeOptionVisibility()
   changeEffect()
@@ -126,7 +154,7 @@ colorPicker.onchange = function () {
   changeEffect()
 }
 
-function offAllBackgroundImageSelection () {
+function offAllBackgroundImageSelection() {
   for (const img of backgroundImages) {
     img.classList.remove('selected')
   }
@@ -145,15 +173,19 @@ async function segmentPersonImage() {
   let maskedImageData: ImageData | null = null
   if (selection === 'mask') {
     const color = hexToRgb(colorPicker.value)
-    maskedImageData = await segmentationMedia.createMaskedImageData({ src: personImage, options: { color }})
+    maskedImageData = await segmentationMedia.createMaskedImageData({
+      src: personImage,
+      options: { color },
+    })
   } else if (selection === 'change-background') {
     const imageData = getSelectedBackgroundImage()
     maskedImageData = await segmentationMedia.createChangedBackgroundImageData({
-      src: personImage, backgroundImage: imageData
+      src: personImage,
+      backgroundImage: imageData,
     })
   } else if (selection === 'blur') {
     maskedImageData = await segmentationMedia.createBluredImageData({
-      src: personImage
+      src: personImage,
     })
   }
   if (!maskedImageData) {
@@ -169,12 +201,12 @@ let srcSelection: 'camera' | 'image-data' = 'camera'
 srcSelectionCamera.onclick = () => {
   srcSelection = 'camera'
   srcCamera.style.display = 'block'
-  srcImageData.style.display = 'none' 
+  srcImageData.style.display = 'none'
 }
 
 srcSelectionImageData.onclick = () => {
   srcSelection = 'image-data'
   srcCamera.style.display = 'none'
-  srcImageData.style.display = 'block' 
+  srcImageData.style.display = 'block'
   segmentPersonImage()
 }
