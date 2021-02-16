@@ -6,7 +6,7 @@ Person segmentation from a media element and manipulate background in the browse
 
 ## [Try it out by live demo heer!](https://joe-re.github.io/segmentation-person-media/)
 
-To segment person, it's using [BodyPix](https://github.com/tensorflow/tfjs-models/tree/master/body-pix) from tensor-flow project.
+To segment person, it's using [BodyPix](https://github.com/tensorflow/tfjs-models/tree/master/body-pix) from tensorflow project.
 
 ## Installing
 
@@ -206,7 +206,7 @@ https://github.com/tensorflow/tfjs-models/tree/master/body-pix#bodypixdrawmask
 
 #### returns
 
-ImageData
+Promise<ImageData>
 
 ### createChangedBackgroundImageData
 
@@ -237,7 +237,7 @@ https://github.com/tensorflow/tfjs-models/tree/master/body-pix#bodypixdrawmask
 
 #### returns
 
-MediaStream
+Promise<ImageData>
 
 ### createBluredImageData
 
