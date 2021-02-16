@@ -1,4 +1,4 @@
 node_modules
 dist
-out.js
+demo/out.js
 .DS_Store

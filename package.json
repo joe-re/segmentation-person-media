@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "yarn demo:build && run-p demo:watch demo:dev-server",
-    "demo:dev-server": "yarn web-dev-server --open ./demo --node-resolve",
+    "demo:dev-server": "yarn web-dev-server --open demo/ --node-resolve",
     "demo:build": "yarn esbuild ./demo/main.ts --bundle --outfile=demo/out.js",
     "demo:watch": "yarn esbuild ./demo/main.ts --bundle --outfile=demo/out.js --watch",
     "build": "yarn run tsc --declaration ./src/index.ts --outDir dist"
