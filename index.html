@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>SegmentationPersonMedia</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="./destyle.css">
+</head>
+
+<body>
+  <div class="app">
+    <h1>SegmentationPersonMedia</h1>
+    <section class="src-selection">
+      <input type="radio" name="src-selection" id="src-selection-camera" value="camera" checked>
+      <label for="src-selection-camera">Camera</label>
+      <input type="radio" name="src-selection" id="src-selection-image-data" value="image-data">
+      <label for="src-selection-image-data">Image Data</label>
+    </section>
+
+    <section id="src-camera">
+      <h2>Camera</h2>
+      <video id="local-video" class="video" width="640" height="480"></video>
+      <video id="masked-video" class="video" width="640" height="480"></video>
+    </section>
+
+    <section id="src-image-data">
+      <div>
+        <img id="person-image" src="./image/jobs.jpg" width="240" />
+        <canvas id="masked-person-image">
+      </div>
+      <p class="attributing">"Steve Jobs Keynote", by <a href="https://www.flickr.com/photos/acaben/" target="_blank">Ben Stanfield</a>, licensed under <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank">CC BY 2.0</a>, <a href="https://www.flickr.com/photos/acaben/541420967/in/set-72157603723478753/" target="_blank">source</a></p>
+    </section>
+
+    <section>
+      <h2>Choose background effect</h2>
+      <div class="background-selection">
+        <input type="radio" name="selection" id="selection-mask" value="mask" checked>
+        <label for="selection-mask">Mask</label>
+        <input type="radio" name="selection" id="selection-change-background" value="change-background">
+        <label for="selection-change-background">Change background</label>
+        <input type="radio" name="selection" id="selection-blur" value="blur">
+        <label for="selection-blur">Blur</label>
+      </div>
+      <div id="for-mask-option">
+        <input type="color" class="color-picker" id="color-picker" value="#03FC0B">
+      </div>
+      <div id="for-change-background-option">
+        <img class="for-change-background-option-image selected" id="mountain-image" src="./image/mountain.jpg"  width="80px" />
+        <img class="for-change-background-option-image" id="grassland-image" src="./image/grassland.png"  width="80px" />
+        <img class="for-change-background-option-image" id="game-image" src="./image/game.png"  width="80px" />
+      </div>
+    </div>
+  </section>
+  <script type="module" src="./out.js"></script>
+</body>
+
+</html>
+
+<style>
+body {
+  font-family: 'Noto Sans', sans-serif;
+  background-color: rgb(29, 29, 29);
+  color: rgb(200, 200, 200);
+}
+
+h1 {
+  font-weight: bold;
+  color: white;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+h2 {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+section {
+  margin-bottom: 16px;
+}
+a:link           { color: #c00 }
+a:visited        { color: #008aab }
+a:hover, a:focus { color: #00c }
+a:active         { color: #ccc }
+
+.app {
+  margin: 16px;
+}
+.video {
+  border: solid black 1px;
+  width:160px;
+  height:120px;
+}
+.background-selection {
+  margin-bottom: 8px;
+}
+.color-picker {
+  width: 80px;
+  height: 60px;
+  border: 2px solid deepskyblue;
+}
+.color-picker:hover {
+  cursor: pointer;
+}
+.option {
+  margin-bottom: 8px;
+}
+.for-change-background-option-image {
+  border-radius: 3px;
+}
+.for-change-background-option-image:hover {
+  cursor: pointer;
+}
+.for-change-background-option-image.selected {
+  border: 2px solid deepskyblue;
+}
+.attributing {
+  font-size: 10px;
+  margin-top: 4px;
+}
+#for-change-background-option {
+  display: none;
+}
+#src-image-data {
+  display: none;
+}
+</style>
