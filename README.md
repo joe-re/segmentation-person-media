@@ -4,7 +4,7 @@ Person segmentation from a media element and manipulate background in the browse
 
 <img src="https://user-images.githubusercontent.com/4954534/108002062-b22e0180-7031-11eb-8e6c-9625074321aa.gif" width=300px>
 
-## <a>Try it out by live demo heer!</a>
+## [Try it out by live demo heer!](https://joe-re.github.io/segmentation-person-media/)
 
 To segment person, it's using [BodyPix](https://github.com/tensorflow/tfjs-models/tree/master/body-pix) from tensor-flow project.
 
